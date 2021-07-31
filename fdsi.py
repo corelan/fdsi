@@ -58,6 +58,15 @@ class CEntry:
         if entrytype == 0 and entryname.endswith(" "):
             self.issuelist.append( "%s ends with a space" % (self.typename) )
 
+        if entrytype == 1:
+            fileparts = os.path.splitext(self.entryname)
+            if len(fileparts) > 0:
+                filename = fileparts[0]
+                if filename.endswith(" "):
+                    self.issuelist.append("%s %s has a space at the end of the file name, before the extension" % (self.typename, self.entryname))
+                    self.issuelist.append( "Full path:")
+                    self.issuelist.append( "%s" % self.fullpath)
+
         if self.pathlength > pathlength:
             prefixtxt = ""
             if entrytype == 1:
