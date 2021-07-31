@@ -54,9 +54,13 @@ class CEntry:
         if len(self.badchars) > 0:
             badcharlist = " ".join(self.badchars)
             self.issuelist.append( "%s contains the following restricted characters: %s" % (self.typename, badcharlist) )
+            self.issuelist.append( "Full path:")
+            self.issuelist.append( "%s" % self.fullpath)
 
-        if entrytype == 0 and entryname.endswith(" "):
-            self.issuelist.append( "%s ends with a space" % (self.typename) )
+        if entrytype == 0 and self.entryname.endswith(" "):
+            self.issuelist.append( "%s %s ends with a space" % (self.typename, self.entryname) )
+            self.issuelist.append( "Full path:")
+            self.issuelist.append( "%s" % self.fullpath)
 
         if entrytype == 1:
             fileparts = os.path.splitext(self.entryname)
