@@ -158,7 +158,7 @@ def getIssues():
             issuecnt += 1
             for thisissue in thisentry.issuelist:
                 print("      > %s" % thisissue)
-    print ("\n   [+] Done. A total of %d entries found with issues" % issuecnt)
+    print ("\n   [+] Done. A total of %d entries found with issues.\n" % issuecnt)
     return
 
 
