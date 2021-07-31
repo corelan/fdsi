@@ -41,7 +41,7 @@ class CEntry:
         self.entryname = entryname
         self.parentfolder = parentfolder
         self.type = entrytype
-        self.fullpath = os.path.join(self.entryname, self.parentfolder)
+        self.fullpath = os.path.join(self.parentfolder, self.entryname)
         self.pathlength = len(self.fullpath)
         self.badchars = getBadChars(self.entryname, entrytype)
         # Folder
@@ -54,10 +54,17 @@ class CEntry:
         if len(self.badchars) > 0:
             badcharlist = " ".join(self.badchars)
             self.issuelist.append( "%s contains the following restricted characters: %s" % (self.typename, badcharlist) )
+
         if entrytype == 0 and entryname.endswith(" "):
             self.issuelist.append( "%s ends with a space" % (self.typename) )
+
         if self.pathlength > pathlength:
-            self.issuelist.append( "%s is longer than %d characters (%d to be specific)" % (self.typename, pathlength, self.pathlength))
+            prefixtxt = ""
+            if entrytype == 1:
+                prefixtxt = "Full path to"
+            self.issuelist.append( "%s %s is longer than %d characters (%d to be specific)" % (prefixtxt, self.typename, pathlength, self.pathlength))
+            self.issuelist.append( "Full path:")
+            self.issuelist.append( "%s" % self.fullpath)
 
 
 def getBadChars(thisentry, entrytype):
@@ -123,10 +130,12 @@ def processFolder(folderpath):
             cfile = CEntry()
             cfile.addEntry(direntry.name, folderpath, 1)
             allEntries.append(cfile)
+            if showverbose:
+                print("       Processed file %s" % cfile.fullpath)
             nrfiles += 1
 
     if showverbose:
-        print("      Folder contains %d subfolders and %d files" % (len(subfolders), nrfiles))
+        print("       Folder contains %d subfolders and %d files" % (len(subfolders), nrfiles))
 
     if len(subfolders) > 0:
         for subfolder in subfolders:
@@ -141,7 +150,11 @@ def getIssues():
     
     for thisentry in allEntries:
         if len(thisentry.issuelist) > 0:
-            print("      %s '%s' requires fixing the following issue(s):" %  (thisentry.typename, thisentry.fullpath))
+            if thisentry.type == 0: # Folder
+                entryname = thisentry.fullpath
+            if thisentry.type == 1: # File
+                entryname = thisentry.entryname
+            print("\n      %s '%s' requires fixing the following issue(s):" %  (thisentry.typename, entryname))
             issuecnt += 1
             for thisissue in thisentry.issuelist:
                 print("      > %s" % thisissue)
