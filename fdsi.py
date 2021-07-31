@@ -70,6 +70,21 @@ def getBadChars(thisentry, entrytype):
             itemsfound.append(baditem)
     return itemsfound
 
+def showBanner():
+    bannertxt = """
+       __    _     _ 
+      / _|  | |   (_)
+     | |_ __| |___ _ 
+     |  _/ _` / __| |
+     | || (_| \__ \ |
+     |_| \__,_|___/_|
+ 
+    fdsi.py - Find Dropbox Sync Issues
+    https://github.com/corelan/fdsi
+
+ """
+    print(bannertxt)
+    return
 
 def showsyntax():
     global pathlength
@@ -91,7 +106,7 @@ def processFolder(folderpath):
     foldername = os.path.basename(folderpath)
 
     if showverbose:
-        print("[+] Processing folder '%s' in '%s'" % (foldername, parentname))
+        print("   [+] Processing folder '%s' in '%s'" % (foldername, parentname))
 
     cfolder = CEntry()
     cfolder.addEntry(foldername, parentname, 0)
@@ -111,7 +126,7 @@ def processFolder(folderpath):
             nrfiles += 1
 
     if showverbose:
-        print("   Folder contains %d subfolders and %d files" % (len(subfolders), nrfiles))
+        print("      Folder contains %d subfolders and %d files" % (len(subfolders), nrfiles))
 
     if len(subfolders) > 0:
         for subfolder in subfolders:
@@ -122,21 +137,22 @@ def getIssues():
     global allEntries
     global pathlength
     issuecnt = 0
-    print("\n[+] Analysis results:")
+    print("\n   [+] Analysis results:")
     
     for thisentry in allEntries:
         if len(thisentry.issuelist) > 0:
-            print("%s '%s' requires fixing the following issue(s):" %  (thisentry.typename, thisentry.fullpath))
+            print("      %s '%s' requires fixing the following issue(s):" %  (thisentry.typename, thisentry.fullpath))
             issuecnt += 1
             for thisissue in thisentry.issuelist:
-                print(" > %s" % thisissue)
-    print ("\n[+] Done. A total of %d entries found with issues" % issuecnt)
+                print("      > %s" % thisissue)
+    print ("\n   [+] Done. A total of %d entries found with issues" % issuecnt)
     return
 
 
 
 def main(argv):
 
+    showBanner()
     global showverbose
     global pathlength
     global allEntries
@@ -167,16 +183,14 @@ def main(argv):
                 pathlength = int(v)
             except Exception as e:
                 print("   *** Invalid length, reset to 260 *** ")
-                print("%s" % str(e))
                 pathlength = 260
 
-    print("\n[+] Working folder: '%s'\n" % startfolder)
+    print("\n   [+] Working folder: '%s'\n" % startfolder)
     if os.path.isabs(startfolder):
         processFolder(startfolder)
         getIssues()
     else:
-        print("    *** %s is not an absolute path. Please provide a full path instead of a relative path ***" % startfolder)
-
+        print("   *** %s is not an absolute path. Please provide a full path instead of a relative path ***" % startfolder)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
