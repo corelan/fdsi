@@ -15,8 +15,8 @@ By default, the script will process the current (working) directory.
 
 # Arguments
 
-`-p <path>`     Specify the starting folder. fdsi will process this folder and all subfolders.
-`-l <number>`   Specify the maximum path length. Set to 260 by default.
-`-v`            Show verbose information.
-`-h`            Show the help.
+* `-p <path>`     Specify the starting folder. fdsi will process this folder and all subfolders. You have to specify a full (absolute) path
+* `-l <number>`   Specify the maximum path length. Set to 260 by default.
+* `-v`            Show verbose information.
+* `-h`            Show the help.
 

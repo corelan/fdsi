@@ -111,9 +111,10 @@ def showsyntax():
     print("")
     print("Usage: python3 '%s' <optional argument(s)>\n" % pathlib.Path(__file__))
     print("Optional arguments:")
-    print("\t-p <path>\tSet startfolder to path. Default = current folder")
-    print("\t-v \t\tShow additional verbose information")
+    print("\t-p <path>\tSet startfolder to path. Default = current folder.")
     print("\t-l <number>\tSet maximum file path length. Default: %d" % pathlength)
+    print("\t-v \t\tShow additional verbose information.")
+    print("\t-h \t\tShow this help message.")
     print("")
 
 
@@ -130,6 +131,8 @@ def processFolder(folderpath):
 
     cfolder = CEntry()
     cfolder.addEntry(foldername, parentname, 0)
+    if showverbose:
+        print("        > Added folder '%s'" % foldername)
     allEntries.append(cfolder)
     subfolders = []
     localfiles = []
@@ -144,7 +147,7 @@ def processFolder(folderpath):
             cfile.addEntry(direntry.name, folderpath, 1)
             allEntries.append(cfile)
             if showverbose:
-                print("       Processed file %s" % cfile.fullpath)
+                print("        > Processed file %s" % cfile.fullpath)
             nrfiles += 1
 
     if showverbose:
@@ -167,10 +170,10 @@ def getIssues():
                 entryname = thisentry.fullpath
             if thisentry.type == 1: # File
                 entryname = thisentry.entryname
-            print("\n      %s '%s' requires fixing the following issue(s):" %  (thisentry.typename, entryname))
+            print("\n       %s '%s' requires fixing the following issue(s):" %  (thisentry.typename, entryname))
             issuecnt += 1
             for thisissue in thisentry.issuelist:
-                print("      > %s" % thisissue)
+                print("       > %s" % thisissue)
     print ("\n   [+] Done. A total of %d entries found with issues.\n" % issuecnt)
     return
 
@@ -191,7 +194,7 @@ def main(argv):
 
     # check command arguments
     try:
-        opts, argv = getopt.getopt(sys.argv[1:], "h:p:v:l:")
+        opts, argv = getopt.getopt(sys.argv[1:], "p:l:hv")
     except getopt.GetoptError:
       showsyntax()
       sys.exit(2)
@@ -211,7 +214,10 @@ def main(argv):
                 print("   *** Invalid length, reset to 260 *** ")
                 pathlength = 260
 
-    print("\n   [+] Working folder: '%s'\n" % startfolder)
+    print("\n")
+    if showverbose:
+        print("   [+] Verbose mode active.")
+    print("   [+] Working folder: '%s'\n" % startfolder)
     if os.path.isabs(startfolder):
         processFolder(startfolder)
         getIssues()
