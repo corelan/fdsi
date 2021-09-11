@@ -23,6 +23,36 @@ global showverbose
 global pathlength
 global allEntries
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\u001b[34m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    RED = '\u001b[31m'
+    GREEN = '\u001b[32m'
+    BLACK  = '\33[30m'
+    WHITE  = '\33[37m'
+    VIOLET = '\33[35m'
+    ORANGE = '\033[33m'
+    LIGHTRED = '\033[91m'
+    LIGHTGREEN = '\033[92m'
+    LIGHTGREY = '\033[37m'
+    BG_BLACK  = '\33[40m'
+    BG_RED    = '\33[41m'
+    BG_GREEN  = '\33[42m'
+    BG_YELLOW = '\33[43m'
+    BG_BLUE   = '\33[44m'
+    BG_VIOLET = '\33[45m'
+    BG_BEIGE  = '\33[46m'
+    BG_WHITE  = '\33[47m'
+
+
 class CEntry:
 
     def __init__(self):
@@ -44,6 +74,7 @@ class CEntry:
         self.fullpath = os.path.join(self.parentfolder, self.entryname)
         self.pathlength = len(self.fullpath)
         self.badchars = getBadChars(self.entryname, entrytype)
+        self.nonasciichars = getNonAsciiChars(self.entryname, entrytype)
         # Folder
         if entrytype == 0:
             self.typename = "Folder"
@@ -53,12 +84,18 @@ class CEntry:
 
         if len(self.badchars) > 0:
             badcharlist = " ".join(self.badchars)
-            self.issuelist.append( "%s contains the following restricted characters: %s" % (self.typename, badcharlist) )
+            self.issuelist.append(f"{bcolors.RED}%s contains the following restricted characters: %s{bcolors.ENDC}" % (self.typename, badcharlist) )
+            self.issuelist.append( "Full path:")
+            self.issuelist.append( "%s" % self.fullpath)
+
+        if len(self.nonasciichars) > 0:
+            nonasciilist = " ".join(self.nonasciichars)
+            self.issuelist.append(f"{bcolors.RED}%s contains the following non-ascii characters: %s{bcolors.ENDC}" % (self.typename, nonasciilist) )
             self.issuelist.append( "Full path:")
             self.issuelist.append( "%s" % self.fullpath)
 
         if entrytype == 0 and self.entryname.endswith(" "):
-            self.issuelist.append( "%s %s ends with a space" % (self.typename, self.entryname) )
+            self.issuelist.append(f"{bcolors.RED}%s %s ends with a space{bcolors.ENDC}" % (self.typename, self.entryname) )
             self.issuelist.append( "Full path:")
             self.issuelist.append( "%s" % self.fullpath)
 
@@ -80,8 +117,47 @@ class CEntry:
             self.issuelist.append( "%s" % self.fullpath)
 
 
+def cleanfilename(filename, folderlocation):
+    origfile = filename
+    newfile = origfile.strip()
+
+    replacelist = {}
+    replacelist["а"] = "a"
+    replacelist["–"] = "-"
+    replacelist["’"] = "'"
+    replacelist["ґ"] = "r"
+    replacelist["…"] = "..."
+    replacelist["İ"] = "I"
+    replacelist["—"] = "-"
+    replacelist["Ѕ"] = "S"
+
+    for replacechar in replacelist:
+        newfile = newfile.replace(replacechar, replacelist[replacechar])
+
+
+    # remove space before extension
+    fileparts = os.path.splitext(newfile)
+    if len(fileparts) > 1:
+        filename_before_ext = fileparts[0]
+        if filename_before_ext.endswith(" "):
+            newfile = filename_before_ext.strip(" ") + fileparts[1]
+
+    if newfile != origfile:
+            try:
+                os.rename(os.path.join(folderlocation, origfile), os.path.join(folderlocation, newfile))
+                #print(f"  Renaming file %s to %s" % (origfile, newfile))
+            except Exception as e:
+                print(f"     {bcolors.RED}*** Unable to rename file '%s': %s{bcolors.ENDC}" % (os.path.join(folderlocation, origfile), str(e)))
+
+
+
+
+    return
+
+
 def getBadChars(thisentry, entrytype):
     badlist = ["/", "\\", "<", ">", ":", '"', "|", "?", "*"]
+
     #if entrytype == 0:
     #    badlist.append(".")
     itemsfound = []
@@ -89,6 +165,18 @@ def getBadChars(thisentry, entrytype):
         if baditem in thisentry:
             itemsfound.append(baditem)
     return itemsfound
+
+def getNonAsciiChars(thisentry, entrytype):
+    nonasciichars = []
+    asciichars = " 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,+-_'&()[]{}!#@óüüáéàçè;"
+    asciiarr = list(asciichars)
+    entryarr = list(thisentry)
+    for entrychar in entryarr:
+        if not entrychar in asciichars:
+            if not entrychar in nonasciichars:
+                nonasciichars.append(entrychar)
+    return nonasciichars
+
 
 def showBanner():
     bannertxt = """
@@ -137,6 +225,13 @@ def processFolder(folderpath):
     subfolders = []
     localfiles = []
     nrfiles = 0
+
+    # first, sanitize filenames to avoid obvious issues
+
+    itemlist = os.scandir(folderpath)
+    for direntry in itemlist:
+        if direntry.is_file():
+            cleanfilename(direntry.name, folderpath)
     
     itemlist = os.scandir(folderpath)
     for direntry in itemlist:
