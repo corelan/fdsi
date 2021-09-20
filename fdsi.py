@@ -233,7 +233,8 @@ def processFolder(folderpath):
         if direntry.is_file():
             cleanfilename(direntry.name, folderpath)
     
-    itemlist = os.scandir(folderpath)
+    itemlist = sorted(os.scandir(folderpath), key=lambda e: e.name)
+
     for direntry in itemlist:
         if direntry.is_dir():
             subfolders.append(os.path.join(folderpath, direntry.name))
@@ -249,6 +250,7 @@ def processFolder(folderpath):
         print("       Folder contains %d subfolders and %d files" % (len(subfolders), nrfiles))
 
     if len(subfolders) > 0:
+        subfolders.sort()
         for subfolder in subfolders:
             processFolder(subfolder)
 
