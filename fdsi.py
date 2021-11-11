@@ -130,6 +130,7 @@ def cleanfilename(filename, folderlocation):
     replacelist["İ"] = "I"
     replacelist["—"] = "-"
     replacelist["Ѕ"] = "S"
+    replacelist["ü"] = "u" 
 
     for replacechar in replacelist:
         newfile = newfile.replace(replacechar, replacelist[replacechar])
@@ -169,6 +170,7 @@ def getBadChars(thisentry, entrytype):
 def getNonAsciiChars(thisentry, entrytype):
     nonasciichars = []
     asciichars = " 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,+-_'&()[]{}!#@óüüáéàçè;"
+    #asciichars = " 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,+-_'&()[]{}!#@óáéàçè;"
     asciiarr = list(asciichars)
     entryarr = list(thisentry)
     for entrychar in entryarr:
