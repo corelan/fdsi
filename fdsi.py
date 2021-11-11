@@ -130,7 +130,7 @@ def cleanfilename(filename, folderlocation):
     replacelist["İ"] = "I"
     replacelist["—"] = "-"
     replacelist["Ѕ"] = "S"
-    replacelist["ü"] = "u" 
+    replacelist["ü"] = "ue" 
 
     for replacechar in replacelist:
         newfile = newfile.replace(replacechar, replacelist[replacechar])
